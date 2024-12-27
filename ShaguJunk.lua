@@ -27,7 +27,7 @@ do -- config
     end
 
     -- add vendor entry
-    if commandlist[1] == "vendor" then
+    if (commandlist[1] == "vendor" or commandlist[1] == "ven") then
       local addstring = table.concat(commandlist," ",2)
       if addstring == "" then return end
 
@@ -46,7 +46,7 @@ do -- config
       DEFAULT_CHAT_FRAME:AddMessage("=> adding |cff33ffcc".. addstring .."|r to your vendor list")
 
     -- add delete entry
-    elseif commandlist[1] == "delete" then
+    elseif (commandlist[1] == "delete" or commandlist[1] == "del") then
       local addstring = table.concat(commandlist," ",2)
       if addstring == "" then return end
 
@@ -65,7 +65,7 @@ do -- config
       DEFAULT_CHAT_FRAME:AddMessage("=> adding |cff33ffcc".. addstring .."|r to your delete list")
 
     -- add dungeon entry
-    elseif (commandlist[1] == "dungeon" or commandlist[1] == "instance") then
+    elseif (commandlist[1] == "dungeon" or commandlist[1] == "instance" or commandlist[1] == "dun") then
       local addstring = table.concat(commandlist," ",2)
       if addstring == "" then return end
 
