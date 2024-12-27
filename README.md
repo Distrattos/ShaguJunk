@@ -6,6 +6,9 @@ automatically deletes the specified items whenever a new item is pushed into the
 
 The lists can by displayed by typing `/junk ls`. You can add new entries to the list by either
 typing `/junk delete ITEMNAME` for the delete list or `/junk vendor ITEMNAME` for the vendor list.
+There is also `/junk dungeon ITEMNAME` for items to delete while only inside of a dungeon, 
+as well as `/junk temp ITEMNAME` for items to delete until new game session (or plugins are reloaded)
+
 Instead of typing the item name, one can also use item links (shift-click the item).
 
 Removing items from the list can be done via `/junk rm ID`, where ID is the identifier number
