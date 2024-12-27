@@ -1,5 +1,17 @@
 local gfind = string.gmatch or string.gfind
 
+local function tContains(table, item)
+  local index = 1;
+  while table[index] do
+    if ( item == table[index] ) then
+      return 1;
+    end
+    index = index + 1;
+  end
+  return nil;
+end
+
+
 do -- config
   ShaguJunk_vendor = ShaguJunk_vendor or {}
   ShaguJunk_delete = ShaguJunk_delete or {}
@@ -24,6 +36,11 @@ do -- config
 
       addstring = itemName or addstring
 
+      if tContains(ShaguJunk_vendor, string.lower(addstring)) then
+        DEFAULT_CHAT_FRAME:AddMessage("=> Vendor list already contains " .. addstring)
+        return
+      end
+
       table.insert(ShaguJunk_vendor, string.lower(addstring))
       DEFAULT_CHAT_FRAME:AddMessage("=> adding |cff33ffcc".. addstring .."|r to your vendor list")
 
@@ -37,6 +54,11 @@ do -- config
       local itemName = itemLink and GetItemInfo(itemLink)
 
       addstring = itemName or addstring
+
+      if tContains(ShaguJunk_delete, string.lower(addstring)) then
+        DEFAULT_CHAT_FRAME:AddMessage("=> Delete list already contains " .. addstring)
+        return
+      end
 
       table.insert(ShaguJunk_delete, string.lower(addstring))
       DEFAULT_CHAT_FRAME:AddMessage("=> adding |cff33ffcc".. addstring .."|r to your delete list")
