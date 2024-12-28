@@ -15,11 +15,16 @@ end
 ShaguJunk = CreateFrame("Frame")
 
 do -- config
+  -- Saved vars
   ShaguJunk_vendor = ShaguJunk_vendor or {}
   ShaguJunk_delete = ShaguJunk_delete or {}
   ShaguJunk_dungeon = ShaguJunk_dungeon or {}
   ShaguJunk_greyValue = ShaguJunk_greyValue or nil
+
+  -- Temp vars
   ShaguJunk_temp = {}
+  ShaguJunk_dryRun = false
+
 
   SLASH_SHAGUJUNK1, SLASH_SHAGUJUNK2, SLASH_SHAGUJUNK3 = "/sjunk", "/junk", "/sj"
   SlashCmdList["SHAGUJUNK"] = function(message)
@@ -204,6 +209,9 @@ do -- config
         DEFAULT_CHAT_FRAME:AddMessage("Grey stack value not set")
       end
 
+    elseif (commandlist[1] == "dry" or commandlist[1] == "dryrun") then
+      ShaguJunk_dryRun = (not ShaguJunk_dryRun)
+      DEFAULT_CHAT_FRAME:AddMessage("Togglin dry run to " .. tostring(ShaguJunk_dryRun))
     else
       DEFAULT_CHAT_FRAME:AddMessage("ShaguJunk Usage:")
       DEFAULT_CHAT_FRAME:AddMessage("|cffaaffdd/sjunk vendor Fel Iron Blood Ring|cffaaaaaa - |rAutomatically vendors Fel Iron Rings")
@@ -291,6 +299,8 @@ do -- autodelete
     autodelete:Show()
   end)
 
+  ShaguJunk_dryProcessed = {}
+
   autodelete:SetScript("OnUpdate", function()
     -- throttle to to one item per .1 second
     if ( this.tick or 1) > GetTime() then return else this.tick = GetTime() + .1 end
@@ -305,37 +315,56 @@ do -- autodelete
         local name = link and GetItemInfo(link)
         name = name and string.lower(name)
 
-        if name then
+        if name and (tContains(ShaguJunk_dryProcessed, string.lower(name)) == nil) then
+
+          -- Delete items from global delete list
           for i, delete in pairs(ShaguJunk_delete) do
             if name == delete then
-              -- clear cursor and delete the item
-              ClearCursor()
-              PickupContainerItem(bag, slot)
-              DeleteCursorItem()
-              -- continue next update
-              return
-            end
-          end
-
-          for i, temp in pairs(ShaguJunk_temp) do
-            if name == temp then
-              -- clear cursor and delete the item
-              ClearCursor()
-              PickupContainerItem(bag, slot)
-              DeleteCursorItem()
-              -- continue next update
-              return
-            end
-          end
-
-          if inInstance then
-            for i, dungeon in pairs(ShaguJunk_dungeon) do
-              if name == dungeon then
+              if ShaguJunk_dryRun then
+                DEFAULT_CHAT_FRAME:AddMessage("Want to delete " .. name .. " from delete list")
+                table.insert(ShaguJunk_dryProcessed, string.lower(name))
+              else
                 -- clear cursor and delete the item
                 ClearCursor()
                 PickupContainerItem(bag, slot)
                 DeleteCursorItem()
                 -- continue next update
+              end
+              return
+            end
+          end
+
+          -- Delete items from temporary delete list
+          for i, temp in pairs(ShaguJunk_temp) do
+            if name == temp then
+              if ShaguJunk_dryRun then
+                DEFAULT_CHAT_FRAME:AddMessage("Want to delete " .. name .. " from temp list")
+                table.insert(ShaguJunk_dryProcessed, string.lower(name))
+              else
+                -- clear cursor and delete the item
+                ClearCursor()
+                PickupContainerItem(bag, slot)
+                DeleteCursorItem()
+                -- continue next update
+              end
+              return
+            end
+          end
+
+          -- Delete items from dungeon delete list
+          if inInstance then
+            for i, dungeon in pairs(ShaguJunk_dungeon) do
+              if name == dungeon then
+                if ShaguJunk_dryRun then
+                  DEFAULT_CHAT_FRAME:AddMessage("Want to delete " .. name .. " from dungeon list")
+                  table.insert(ShaguJunk_dryProcessed, string.lower(name))
+                else
+                  -- clear cursor and delete the item
+                  ClearCursor()
+                  PickupContainerItem(bag, slot)
+                  DeleteCursorItem()
+                  -- continue next update
+                end
                 return
               end
             end
@@ -359,12 +388,19 @@ do -- autodelete
                   local silverValue = stackValue / 100
 
                   if silverValue < ShaguJunk_greyValue then
+                    if ShaguJunk_dryRun then
+                      DEFAULT_CHAT_FRAME:AddMessage("Want to delete " .. name .. " with calculated value " .. silverValue .. " which is less than limit " .. ShaguJunk_greyValue)
+                      table.insert(ShaguJunk_dryProcessed, string.lower(name))
+                    else
                       ClearCursor()
                       PickupContainerItem(bag, slot)
                       DeleteCursorItem()
                     end
 
                   end
+
+                else
+                  DEFAULT_CHAT_FRAME:AddMessage("Item " .. itemName .. " doesn't exist in database, not gonna delete to be safe")
                 end
               end
             end
@@ -375,6 +411,7 @@ do -- autodelete
     end
 
     -- stop processing
+    ShaguJunk_dryProcessed = {}
     this:Hide()
   end)
 end
