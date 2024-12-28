@@ -12,6 +12,8 @@ local function tContains(table, item)
 end
 
 
+ShaguJunk = CreateFrame("Frame")
+
 do -- config
   ShaguJunk_vendor = ShaguJunk_vendor or {}
   ShaguJunk_delete = ShaguJunk_delete or {}

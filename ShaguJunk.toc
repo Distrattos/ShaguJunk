@@ -5,3 +5,4 @@
 ## Version: 1.0
 ## SavedVariablesPerCharacter: ShaguJunk_vendor, ShaguJunk_delete, ShaguJunk_dungeon
 ShaguJunk.lua
+VendorData.lua
