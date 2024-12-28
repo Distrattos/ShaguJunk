@@ -11,6 +11,9 @@ as well as `/junk temp ITEMNAME` for items to delete until new game session (or 
 
 Instead of typing the item name, one can also use item links (shift-click the item).
 
+You can also specify a limit for grey items in silver using `/junk grey SILVERVALUE`,
+which will delete any item with stack value below this limit
+
 Removing items from the list can be done via `/junk rm ID`, where ID is the identifier number
 that is shown in `/junk ls`.
 
