@@ -18,6 +18,7 @@ do -- config
   ShaguJunk_vendor = ShaguJunk_vendor or {}
   ShaguJunk_delete = ShaguJunk_delete or {}
   ShaguJunk_dungeon = ShaguJunk_dungeon or {}
+  ShaguJunk_greyValue = ShaguJunk_greyValue or nil
   ShaguJunk_temp = {}
 
   SLASH_SHAGUJUNK1, SLASH_SHAGUJUNK2, SLASH_SHAGUJUNK3 = "/sjunk", "/junk", "/sj"
@@ -106,6 +107,25 @@ do -- config
       table.insert(ShaguJunk_temp, string.lower(addstring))
       DEFAULT_CHAT_FRAME:AddMessage("=> adding |cff33ffcc".. addstring .."|r to your temp delete list")
 
+      -- add greyvalue entry
+    elseif (commandlist[1] == "grey" or commandlist[1] == "gray") then
+      local numstring = table.concat(commandlist," ",2)
+      if numstring == "" then return end
+
+      local number = tonumber(numstring)
+      if not number then
+        DEFAULT_CHAT_FRAME:AddMessage("=> Unable to parse |cff33ffcc".. numstring .."|r to value")
+        return
+      end
+
+      if number < 0 then
+        DEFAULT_CHAT_FRAME:AddMessage("=> Grey value has to be positive number")
+        return
+      end
+
+      ShaguJunk_greyValue = number
+      DEFAULT_CHAT_FRAME:AddMessage("=> Setting grey auto-delete value to |cff33ffcc" .. number .."|r")
+
     -- remove entry
     elseif commandlist[1] == "rm" then
       local vendor = tonumber(commandlist[2])
@@ -178,12 +198,19 @@ do -- config
         tempID = id
       end
 
+      if ShaguJunk_greyValue then
+        DEFAULT_CHAT_FRAME:AddMessage("Grey stack value set to |r[|cffee3333 "..ShaguJunk_greyValue.."|r]")
+      else
+        DEFAULT_CHAT_FRAME:AddMessage("Grey stack value not set")
+      end
+
     else
       DEFAULT_CHAT_FRAME:AddMessage("ShaguJunk Usage:")
       DEFAULT_CHAT_FRAME:AddMessage("|cffaaffdd/sjunk vendor Fel Iron Blood Ring|cffaaaaaa - |rAutomatically vendors Fel Iron Rings")
       DEFAULT_CHAT_FRAME:AddMessage("|cffaaffdd/sjunk delete Light Hide|cffaaaaaa - |rAutomatically deletes Light Hide")
       DEFAULT_CHAT_FRAME:AddMessage("|cffaaffdd/sjunk dungeon Linen Cloth|cffaaaaaa - |rAutomatically deletes Linen Cloth when inside dungeon")
       DEFAULT_CHAT_FRAME:AddMessage("|cffaaffdd/sjunk temp Small Egg|cffaaaaaa - |rAutomatically deletes Small Egg in this game session")
+      DEFAULT_CHAT_FRAME:AddMessage("|cffaaffdd/sjunk grey 10|cffaaaaaa - |rAutomatically deletes any grey item with stack value less than 10 silver")
       DEFAULT_CHAT_FRAME:AddMessage("|cffaaffdd/sjunk rm 3|cffaaaaaa - |rRemoves entry '3' of your list")
       DEFAULT_CHAT_FRAME:AddMessage("|cffaaffdd/sjunk ls|cffaaaaaa - |rDisplays your current list")
       DEFAULT_CHAT_FRAME:AddMessage("|cffaaffdd/sjunk ls <text>|cffaaaaaa - |rSearch your current list for text")
@@ -241,6 +268,20 @@ do -- autovendor
   end)
 end
 
+
+local function GetItemStackValue(id)
+  if ShaguJunk.SellValueDB[id] and ShaguJunk.SellValueDB[id] > 0 then
+
+    local singleValue = ShaguJunk.SellValueDB[id]
+
+    local _, _, quality, _, type, subType, stackCount, invType = GetItemInfo(id)
+
+    return singleValue * stackCount
+  end
+
+  return nil
+end
+
 do -- autodelete
   local autodelete = CreateFrame("Frame")
   autodelete:Hide()
@@ -296,6 +337,35 @@ do -- autodelete
                 DeleteCursorItem()
                 -- continue next update
                 return
+              end
+            end
+          end
+
+          -- Delete grey items with vendor value below threshold
+          if ShaguJunk_greyValue then
+            local _,_,itemRarity = GetItemInfo(link)
+            if itemRarity == 0 then
+
+              --DEFAULT_CHAT_FRAME:AddMessage("Testing ShaguJunk.SellValueDB value @ [3171] " .. ShaguJunk.SellValueDB[3171])
+
+              --DEFAULT_CHAT_FRAME:AddMessage("Checking item link " .. link)
+              local _, _, id = string.find(link, "item:(%d+):%d+:%d+:%d+")
+
+              if id then
+                --DEFAULT_CHAT_FRAME:AddMessage("Found id " .. id)
+                local stackValue = GetItemStackValue(tonumber(id))
+                if stackValue then
+
+                  local silverValue = stackValue / 100
+
+                  if silverValue < ShaguJunk_greyValue then
+                      ClearCursor()
+                      PickupContainerItem(bag, slot)
+                      DeleteCursorItem()
+                    end
+
+                  end
+                end
               end
             end
           end

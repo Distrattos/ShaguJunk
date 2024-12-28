@@ -3,6 +3,6 @@
 ## Author: Shagu
 ## Notes: Automatically deletes or vendors specified items
 ## Version: 1.0
-## SavedVariablesPerCharacter: ShaguJunk_vendor, ShaguJunk_delete, ShaguJunk_dungeon
+## SavedVariablesPerCharacter: ShaguJunk_vendor, ShaguJunk_delete, ShaguJunk_dungeon, ShaguJunk_greyValue
 ShaguJunk.lua
 VendorData.lua
